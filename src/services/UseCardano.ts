@@ -32,7 +32,7 @@ export class BlockchainRealService {
     this.lucid = await Lucid.new(
       new Blockfrost(
         "https://cardano-preprod.blockfrost.io/api/v0",
-        "preprodYourProjectIdHere"
+        import.meta.env.VITE_BLOCKFROST_PROJECT_ID
       ),
       "Preprod"
     );
