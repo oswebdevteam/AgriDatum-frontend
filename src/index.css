@@ -6,9 +6,6 @@
     scroll-behavior: smooth;
   }
   
-  body {
-    font-family: 'Inter', sans-serif;
-  }
 
   :root {
     --primary-50: #f0f9f4;
