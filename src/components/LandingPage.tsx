@@ -5,6 +5,8 @@ interface LandingPageProps {
   onGetStarted: () => void
 }
 
+const presentYear = new Date().getFullYear();
+
 const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
   return (
     <div className="min-h-screen">
@@ -80,7 +82,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* Built for Farmers Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -111,7 +112,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* How It Works Section */}
       <section className="py-20 bg-primary-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
@@ -146,7 +146,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-primary-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
@@ -161,7 +160,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
                 Empowering African Farmers Through Data Ownership
               </p>
               <p className="text-primary-300 text-sm mt-2">
-                © 2025 AgriDatum. All rights reserved.
+                © {presentYear} AgriDatum. All rights reserved.
               </p>
             </div>
           </div>
