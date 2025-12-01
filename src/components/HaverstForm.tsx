@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
-import { ArrowLeft, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { ArrowLeft, CheckCircle, AlertCircle, ExternalLink, Loader } from 'lucide-react';
 import type { HarvestFormData, HarvestRecord } from '../types';
-import { BlockchainRealService } from '../services/UseCardano';
-import type { HarvestPayload } from '../services/UseCardano';
+import { cardanoRealService } from '../services/UseCardano';
+import { harvestApi } from '../services/api/harvestApi';
 import HarvestRecords from './HarvestRecords';
 
 interface HarvestFormProps {
@@ -25,19 +25,53 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [activeTab, setActiveTab] = useState<'form' | 'records'>('form');
   const [lastTransactionHash, setLastTransactionHash] = useState<string>('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); 
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoadingRecords, setIsLoadingRecords] = useState(false);
+  const [currentFarmerId, setCurrentFarmerId] = useState<string | null>(null);
 
-  const blockchainService = useMemo(() => new BlockchainRealService(), []);
+  const blockchainService = useMemo(() => new cardanoRealService(), []);
+
+  useEffect(() => {
+    if (activeTab === 'records' && currentFarmerId) {
+      loadFarmerRecords(currentFarmerId);
+    }
+  }, [activeTab, currentFarmerId]);
+
+  const loadFarmerRecords = async (farmerId: string) => {
+    setIsLoadingRecords(true);
+    try {
+      const response = await harvestApi.getRecordsByFarmer(farmerId);
+      
+      if (response.success && response.data) {
+        const transformedRecords: HarvestRecord[] = response.data.map((record: any) => ({
+          id: record.id.toString(),
+          phoneNumber: record.phone_number,
+          plotLocation: record.plot_location,
+          cropType: record.crop_type,
+          weightKg: parseFloat(record.weight_kg),
+          timestamp: record.timestamp,
+          transactionHash: record.transaction_hash,
+          publicKey: record.public_key,
+          farmerAddress: record.farmer_address,
+          signature: record.signature?.slice(0, 32),
+          indexedOnChain: record.indexed_on_chain,
+          farmerId: record.farmer_id
+        }));
+        
+        setHarvestRecords(transformedRecords);
+      }
+    } catch (error) {
+      console.error('Failed to load records:', error);
+      setErrorMessage('Failed to load harvest records from database');
+    } finally {
+      setIsLoadingRecords(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
-    
     const newValue = type === 'number' ? (value === '' ? '' : parseFloat(value)) : value;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: newValue
-    }));
+    setFormData(prev => ({ ...prev, [name]: newValue }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,15 +79,16 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
     setIsSubmitting(true);
     setSubmitStatus('idle');
     setLastTransactionHash('');
-    setErrorMessage(null); 
+    setErrorMessage(null);
 
     try {
-      if (!formData.phoneNumber || !formData.pin || !formData.plotLocation || !formData.cropType || formData.weightKg === '') {
+      if (!formData.phoneNumber || !formData.pin || !formData.plotLocation || 
+          !formData.cropType || formData.weightKg === '') {
         throw new Error('All fields are required.');
       }
       
       if (typeof formData.weightKg !== 'number' || formData.weightKg <= 0) {
-          throw new Error('Harvest weight must be a positive number.');
+        throw new Error('Harvest weight must be a positive number.');
       }
 
       if (formData.pin.length !== 6 || !/^\d+$/.test(formData.pin)) {
@@ -65,46 +100,75 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
         formData.pin
       );
 
-      const payload: HarvestPayload = {
-        cropType: formData.cropType,
-        weightKg: formData.weightKg, 
-        locationText: formData.plotLocation,
-        timestamp: new Date().toISOString(),
-        farmerId
-      };
+      setCurrentFarmerId(farmerId); 
 
-      const result = await blockchainService.submitHarvestToBlockchain(payload, seedInput);
+      const keyData = await blockchainService.submitHarvestToBlockchain(
+        {
+          cropType: formData.cropType,
+          weightKg: formData.weightKg,
+          locationText: formData.plotLocation,
+          timestamp: new Date().toISOString(),
+          farmerId
+        },
+        seedInput
+      );
 
-      const newRecord: HarvestRecord = {
-        id: Date.now().toString(),
+      const timestamp = new Date().toISOString();
+      const apiPayload = {
+        farmerId,
         phoneNumber: formData.phoneNumber,
         plotLocation: formData.plotLocation,
-        cropType: formData.cropType,         
-        weightKg: formData.weightKg as number, 
-        timestamp: payload.timestamp,
-        transactionHash: result.transactionHash,
-        publicKey: result.publicKey,
-        farmerAddress: result.farmerAddress,
-        signature: result.signature.slice(0, 32)
+        cropType: formData.cropType,
+        weightKg: formData.weightKg as number,
+        timestamp,
+        publicKey: keyData.publicKey,
+        signature: keyData.signature
+      };
+
+      console.log('Submitting to backend:', apiPayload);
+      const apiResponse = await harvestApi.submitHarvest(apiPayload);
+
+      if (!apiResponse.success) {
+        throw new Error(apiResponse.error || 'Failed to save harvest record');
+      }
+
+      
+      const newRecord: HarvestRecord = {
+        id: apiResponse.data?.id?.toString() || Date.now().toString(),
+        phoneNumber: formData.phoneNumber,
+        plotLocation: formData.plotLocation,
+        cropType: formData.cropType,
+        weightKg: formData.weightKg as number,
+        timestamp,
+        transactionHash: apiResponse.blockchain?.transactionHash || null,
+        publicKey: keyData.publicKey,
+        farmerAddress: keyData.farmerAddress,
+        signature: keyData.signature.slice(0, 32),
+        indexedOnChain: apiResponse.blockchain?.submitted || false,
+        farmerId
       };
 
       setHarvestRecords(prev => [newRecord, ...prev]);
       
-      setLastTransactionHash(result.transactionHash);
+      if (apiResponse.blockchain?.transactionHash) {
+        setLastTransactionHash(apiResponse.blockchain.transactionHash);
+      }
+      
       setSubmitStatus('success');
+      
       
       setFormData({
         phoneNumber: '',
         pin: '',
         plotLocation: '',
-        cropType: '',
-        weightKg: ''
+        cropType: 'Maize',
+        weightKg: 50
       });
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown submission error occurred.';
       console.error('Submission error:', error);
-      setErrorMessage(message); 
+      setErrorMessage(message);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -171,7 +235,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-6">
               <div>
                 <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
                   Phone Number (Farmer ID) *
@@ -201,10 +265,8 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
                   onChange={handleInputChange}
                   required
                   maxLength={6}
-                  pattern="[0-9]{6}"
                   className="input-field"
                   placeholder="123456"
-                  title="Must be exactly 6 digits"
                 />
                 <p className="text-xs text-gray-500 mt-1">Exactly 6 digits (0-9)</p>
               </div>
@@ -253,6 +315,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
                   onChange={handleInputChange}
                   required
                   min="0.1"
+                  step="0.1"
                   className="input-field"
                   placeholder="50"
                 />
@@ -290,57 +353,65 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
                   <div className="text-red-800">
                     <span className="font-medium block mb-1">Error recording harvest.</span>
                     <p className="text-sm">
-                      Details: **{errorMessage || 'An unexpected error occurred. Please try again.'}**
+                      {errorMessage || 'An unexpected error occurred. Please try again.'}
                     </p>
                   </div>
                 </div>
               )}
 
               <button
-                type="submit"
+                onClick={handleSubmit}
                 disabled={isSubmitting}
                 className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Recording to Blockchain...
+                    <Loader className="w-5 h-5 animate-spin mr-2" />
+                    Submitting to Database & Blockchain...
                   </div>
                 ) : (
-                  'Record Harvest on Blockchain'
+                  'Record Harvest'
                 )}
               </button>
-            </form>
+            </div>
 
-            
             <div className="mt-8 p-4 bg-primary-50 border border-primary-200 rounded-lg">
               <h3 className="font-semibold text-primary-900 mb-2">
-                Blockchain Security:
+                How It Works:
               </h3>
               <ul className="text-sm text-primary-700 space-y-1">
-                <li>• Your credentials generate a unique Cardano wallet</li>
-                <li>• Data is signed and stored on Cardano Preprod network</li>
-                <li>• Gas fees are sponsored by AgriDatum</li>
-                <li>• Records are immutable and permanently verifiable</li>
+                <li>• Your credentials generate a unique farmer ID (never leaves your device)</li>
+                <li>• Backend handles secure blockchain submission to Cardano</li>
+                <li>• Records saved to database for quick access</li>
+                <li>• All records are cryptographically signed and verifiable</li>
               </ul>
             </div>
           </div>
         ) : (
-          <HarvestRecords 
-            records={harvestRecords} 
-            onDownload={() => {
-              const dataStr = JSON.stringify(harvestRecords, null, 2);
-              const dataBlob = new Blob([dataStr], { type: 'application/json' });
-              const url = URL.createObjectURL(dataBlob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = `agridatum-records-${new Date().toISOString().split('T')[0]}.json`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-            }}
-          />
+          <>
+            {isLoadingRecords ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader className="w-8 h-8 animate-spin text-primary-600" />
+                <span className="ml-3 text-gray-600">Loading records from database...</span>
+              </div>
+            ) : (
+              <HarvestRecords 
+                records={harvestRecords} 
+                onDownload={() => {
+                  const dataStr = JSON.stringify(harvestRecords, null, 2);
+                  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                  const url = URL.createObjectURL(dataBlob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `agridatum-records-${new Date().toISOString().split('T')[0]}.json`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                }}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
