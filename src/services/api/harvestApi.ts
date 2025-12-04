@@ -63,8 +63,8 @@ export interface VerificationResponse {
   metadata: any;
 }
 
+
 class HarvestApiService {
-  
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -80,6 +80,9 @@ class HarvestApiService {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({ error: 'Request failed' }));
+        console.error('=== API ERROR RESPONSE ===');
+        console.error('Status:', response.status);
+        console.error('Error:', error);
         throw new Error(error.error || error.message || `HTTP ${response.status}`);
       }
 
@@ -92,7 +95,18 @@ class HarvestApiService {
     }
   }
 
-  
+  async generateKeys(seedInput: string): Promise<{
+    success: boolean;
+    publicKey: string;
+    farmerAddress: string;
+    farmerId: string;
+  }> {
+    return this.request<any>('/api/keys/generate', {
+      method: 'POST',
+      body: JSON.stringify({ seedInput }),
+    });
+  }
+
   async submitHarvest(data: HarvestSubmission): Promise<ApiResponse<HarvestRecordAPI>> {
     return this.request<ApiResponse<HarvestRecordAPI>>(
       '/api/harvest/submit',
@@ -152,7 +166,6 @@ class HarvestApiService {
 
 export const harvestApi = new HarvestApiService();
 
-// Transform API record to frontend harvest record format
 export function transformApiRecord(apiRecord: HarvestRecordAPI): any {
   return {
     id: apiRecord.id.toString(),
@@ -169,7 +182,6 @@ export function transformApiRecord(apiRecord: HarvestRecordAPI): any {
     farmerId: apiRecord.farmer_id,
   };
 }
-
 
 export function transformApiRecords(apiRecords: HarvestRecordAPI[]): any[] {
   return apiRecords.map(transformApiRecord);
