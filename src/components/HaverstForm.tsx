@@ -31,6 +31,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
 
   const blockchainService = useMemo(() => new cardanoRealService(), []);
 
+  // Load records when tab changes or after successful submission
   useEffect(() => {
     if (activeTab === 'records' && currentFarmerId) {
       loadFarmerRecords(currentFarmerId);
@@ -43,6 +44,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
       const response = await harvestApi.getRecordsByFarmer(farmerId);
       
       if (response.success && response.data) {
+        // Transform API records to match your HarvestRecord interface
         const transformedRecords: HarvestRecord[] = response.data.map((record: any) => ({
           id: record.id.toString(),
           phoneNumber: record.phone_number,
@@ -82,6 +84,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
     setErrorMessage(null);
 
     try {
+      // ===== VALIDATION =====
       if (!formData.phoneNumber || !formData.pin || !formData.plotLocation || 
           !formData.cropType || formData.weightKg === '') {
         throw new Error('All fields are required.');
@@ -100,20 +103,29 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
         formData.pin
       );
 
-      setCurrentFarmerId(farmerId); 
+      setCurrentFarmerId(farmerId);
 
+      
+      const timestamp = new Date().toISOString();
       const keyData = await blockchainService.submitHarvestToBlockchain(
         {
           cropType: formData.cropType,
           weightKg: formData.weightKg,
           locationText: formData.plotLocation,
-          timestamp: new Date().toISOString(),
+          timestamp,
           farmerId
         },
         seedInput
       );
+      
+      console.log('=== GENERATED KEY DATA ===');
+      console.log('publicKey:', keyData.publicKey);
+      console.log('publicKey length:', keyData.publicKey.length);
+      console.log('publicKey is hex?:', /^[0-9a-fA-F]+$/.test(keyData.publicKey));
+      console.log('signature:', keyData.signature ? 'provided' : 'missing');
+      console.log('farmerAddress:', keyData.farmerAddress);
 
-      const timestamp = new Date().toISOString();
+      
       const apiPayload = {
         farmerId,
         phoneNumber: formData.phoneNumber,
@@ -125,8 +137,14 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
         signature: keyData.signature
       };
 
-      console.log('Submitting to backend:', apiPayload);
+      console.log('=== SUBMITTING TO BACKEND ===');
+      console.log('Payload:', JSON.stringify(apiPayload, null, 2));
+      console.log('Endpoint:', `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/harvest/submit`);
+      
       const apiResponse = await harvestApi.submitHarvest(apiPayload);
+      
+      console.log('=== BACKEND RESPONSE ===');
+      console.log('Response:', JSON.stringify(apiResponse, null, 2));
 
       if (!apiResponse.success) {
         throw new Error(apiResponse.error || 'Failed to save harvest record');

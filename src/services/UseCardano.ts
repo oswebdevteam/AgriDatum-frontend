@@ -14,6 +14,8 @@ export interface BlockchainResult {
   signature: string;
   farmerAddress: string;
 }
+
+
 export class cardanoRealService {
   
   async deriveKeyFromCredentials(phoneNumber: string, pin: string): Promise<{
@@ -27,33 +29,51 @@ export class cardanoRealService {
     return { seedInput, farmerId };
   }
 
-  async generateKeysFromSeed(seedInput: string): Promise<{
+  async generateKeysFromSeed(
+    seedInput: string, 
+    harvestData?: any
+  ): Promise<{
     publicKey: string;
     farmerAddress: string;
     farmerId: string;
+    signature?: string;
   }> {
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+      const url = `${API_BASE_URL}/api/keys/generate`;
       
-      const response = await fetch(`${API_BASE_URL}/api/keys/generate`, {
+      console.log('=== GENERATING KEYS FROM BACKEND ===');
+      console.log('URL:', url);
+      console.log('seedInput:', seedInput.slice(0, 16) + '...');
+      console.log('harvestData:', harvestData ? 'provided' : 'not provided');
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ seedInput }),
+        body: JSON.stringify({ seedInput, harvestData }),
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to generate keys from backend');
+        const errorText = await response.text();
+        console.error('Backend error:', errorText);
+        throw new Error(`Backend returned ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('Keys generated successfully');
+      
       return {
         publicKey: result.publicKey,
         farmerAddress: result.farmerAddress,
         farmerId: result.farmerId,
+        signature: result.signature,
       };
     } catch (error) {
+      console.error('=== KEY GENERATION ERROR ===', error);
       throw new Error(`Key generation failed: ${error}`);
     }
   }
@@ -62,19 +82,27 @@ export class cardanoRealService {
     payload: HarvestPayload,
     seedInput: string
   ): Promise<BlockchainResult> {
-    const keys = await this.generateKeysFromSeed(seedInput);
     
-    const signature = sha256(JSON.stringify(payload) + seedInput);
+    const harvestData = {
+      farmerId: payload.farmerId,
+      phoneNumber: '', 
+      plotLocation: payload.locationText,
+      cropType: payload.cropType,
+      weightKg: payload.weightKg,
+      timestamp: payload.timestamp,
+    };
+
+    const keys = await this.generateKeysFromSeed(seedInput, harvestData);
     
     return {
       transactionHash: '', 
       publicKey: keys.publicKey,
-      signature,
+      signature: keys.signature || '',
       farmerAddress: keys.farmerAddress,
     };
   }
 
-  
+
   async verifyTransaction(txHash: string): Promise<boolean> {
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
