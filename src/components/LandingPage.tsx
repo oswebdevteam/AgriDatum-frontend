@@ -15,7 +15,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <div className="bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="w-[160px] object-cover"><img src= "/images/logo.png" alt=''/></span>
+                <span className="w-40 object-cover"><img src= "/images/logo.png" alt=''/></span>
               </div>  
               {/* <span className="text-xl font-bold text-primary-900">AgriDatum</span> */}
             </div>
