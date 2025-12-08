@@ -14,10 +14,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">A</span>
-              </div>
-              <span className="text-xl font-bold text-primary-900">AgriDatum</span>
+              <div className="bg-primary-600 rounded-lg flex items-center justify-center">
+                <span className="w-[160px] object-cover"><img src= "/images/logo.png" alt=''/></span>
+              </div>  
+              {/* <span className="text-xl font-bold text-primary-900">AgriDatum</span> */}
             </div>
             <button 
               onClick={onGetStarted}
@@ -27,7 +27,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
             </button>
           </div>
         </div>
-      </nav>
+      </nav>  
 
 <section className="pt-7 pb-15 lg:pt-10 lg:pb-25 px-4 sm:px-6 lg:px-8">
   <div className="max-w-7xl mx-auto">
