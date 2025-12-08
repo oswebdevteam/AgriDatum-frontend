@@ -29,23 +29,35 @@ export class cardanoRealService {
     return { seedInput, farmerId };
   }
 
-  async generateKeysFromSeed(
-    seedInput: string, 
-    harvestData?: any
+  async generateKeysAndSignature(
+    seedInput: string,
+    farmerId: string,
+    phoneNumber: string,
+    plotLocation: string,
+    cropType: string,
+    weightKg: number,
+    timestamp: string
   ): Promise<{
     publicKey: string;
     farmerAddress: string;
-    farmerId: string;
-    signature?: string;
+    signature: string;
   }> {
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
       const url = `${API_BASE_URL}/api/keys/generate`;
       
-      console.log('=== GENERATING KEYS FROM BACKEND ===');
+      const harvestData = {
+        farmerId,
+        phoneNumber,
+        plotLocation,
+        cropType,
+        weightKg,
+        timestamp,
+      };
+      
+      console.log('=== GENERATING KEYS & SIGNATURE FROM BACKEND ===');
       console.log('URL:', url);
-      console.log('seedInput:', seedInput.slice(0, 16) + '...');
-      console.log('harvestData:', harvestData ? 'provided' : 'not provided');
+      console.log('harvestData:', JSON.stringify(harvestData, null, 2));
       
       const response = await fetch(url, {
         method: 'POST',
@@ -64,42 +76,22 @@ export class cardanoRealService {
       }
 
       const result = await response.json();
-      console.log('Keys generated successfully');
+      console.log('Keys and signature generated successfully');
+      console.log('Signature present:', !!result.signature);
+      
+      if (!result.signature) {
+        throw new Error('Backend did not return a signature');
+      }
       
       return {
         publicKey: result.publicKey,
         farmerAddress: result.farmerAddress,
-        farmerId: result.farmerId,
         signature: result.signature,
       };
     } catch (error) {
       console.error('=== KEY GENERATION ERROR ===', error);
       throw new Error(`Key generation failed: ${error}`);
     }
-  }
-
-  async submitHarvestToBlockchain(
-    payload: HarvestPayload,
-    seedInput: string
-  ): Promise<BlockchainResult> {
-    
-    const harvestData = {
-      farmerId: payload.farmerId,
-      phoneNumber: '', 
-      plotLocation: payload.locationText,
-      cropType: payload.cropType,
-      weightKg: payload.weightKg,
-      timestamp: payload.timestamp,
-    };
-
-    const keys = await this.generateKeysFromSeed(seedInput, harvestData);
-    
-    return {
-      transactionHash: '', 
-      publicKey: keys.publicKey,
-      signature: keys.signature || '',
-      farmerAddress: keys.farmerAddress,
-    };
   }
 
 

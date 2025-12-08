@@ -31,7 +31,6 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
 
   const blockchainService = useMemo(() => new cardanoRealService(), []);
 
-  // Load records when tab changes or after successful submission
   useEffect(() => {
     if (activeTab === 'records' && currentFarmerId) {
       loadFarmerRecords(currentFarmerId);
@@ -44,7 +43,6 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
       const response = await harvestApi.getRecordsByFarmer(farmerId);
       
       if (response.success && response.data) {
-        // Transform API records to match your HarvestRecord interface
         const transformedRecords: HarvestRecord[] = response.data.map((record: any) => ({
           id: record.id.toString(),
           phoneNumber: record.phone_number,
@@ -84,7 +82,6 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
     setErrorMessage(null);
 
     try {
-      // ===== VALIDATION =====
       if (!formData.phoneNumber || !formData.pin || !formData.plotLocation || 
           !formData.cropType || formData.weightKg === '') {
         throw new Error('All fields are required.');
@@ -103,29 +100,35 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
         formData.pin
       );
 
-      setCurrentFarmerId(farmerId);
+      setCurrentFarmerId(farmerId); // Store for loading records later
 
       
       const timestamp = new Date().toISOString();
-      const keyData = await blockchainService.submitHarvestToBlockchain(
-        {
-          cropType: formData.cropType,
-          weightKg: formData.weightKg,
-          locationText: formData.plotLocation,
-          timestamp,
-          farmerId
-        },
-        seedInput
+      
+      console.log('=== PREPARING TO GENERATE KEYS ===');
+      console.log('farmerId:', farmerId);
+      console.log('phoneNumber:', formData.phoneNumber);
+      console.log('plotLocation:', formData.plotLocation);
+      console.log('cropType:', formData.cropType);
+      console.log('weightKg:', formData.weightKg);
+      console.log('timestamp:', timestamp);
+      
+      const keyData = await blockchainService.generateKeysAndSignature(
+        seedInput,
+        farmerId,
+        formData.phoneNumber,
+        formData.plotLocation,
+        formData.cropType,
+        formData.weightKg as number,
+        timestamp
       );
       
       console.log('=== GENERATED KEY DATA ===');
       console.log('publicKey:', keyData.publicKey);
       console.log('publicKey length:', keyData.publicKey.length);
-      console.log('publicKey is hex?:', /^[0-9a-fA-F]+$/.test(keyData.publicKey));
-      console.log('signature:', keyData.signature ? 'provided' : 'missing');
+      console.log('signature length:', keyData.signature.length);
       console.log('farmerAddress:', keyData.farmerAddress);
 
-      
       const apiPayload = {
         farmerId,
         phoneNumber: formData.phoneNumber,
@@ -150,7 +153,6 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
         throw new Error(apiResponse.error || 'Failed to save harvest record');
       }
 
-      
       const newRecord: HarvestRecord = {
         id: apiResponse.data?.id?.toString() || Date.now().toString(),
         phoneNumber: formData.phoneNumber,
@@ -174,7 +176,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
       
       setSubmitStatus('success');
       
-      
+      // Reset form
       setFormData({
         phoneNumber: '',
         pin: '',
