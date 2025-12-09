@@ -50,7 +50,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBackToAuth }) => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-(--primary-50) flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <button
           onClick={onBackToAuth}
@@ -62,10 +62,9 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBackToAuth }) => {
 
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">A</span>
+            <div className="rounded-lg flex items-center justify-center">
+              <span className="w-40 object-cover"><img src= "/images/logo.png" alt=''/></span>
             </div>
-            <h1 className="text-3xl font-bold text-green-900">AgriDatum</h1>
           </div>
           <p className="text-gray-600">
             Blockchain-powered harvest tracking
@@ -74,7 +73,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBackToAuth }) => {
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="flex items-center space-x-2 mb-6">
-            <UserCircle className="w-6 h-6 text-green-600" />
+            <UserCircle className="w-6 h-6 text-(--primary-600)" />
             <h2 className="text-2xl font-bold text-gray-900">Login</h2>
           </div>
 
@@ -127,7 +126,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess, onBackToAuth }) => {
             <button
               onClick={handleLogin}
               disabled={isLoading}
-              className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+              className="w-full bg-(--primary-600) text-white py-3 rounded-lg font-medium hover:bg-(--primary-700) disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
             >
               {isLoading ? (
                 <>

@@ -44,7 +44,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess, onBackToAuth }) => {
         throw new Error('PINs do not match');
       }
 
-      // Generate farmerId from credentials
+      
       const { farmerId } = await blockchainService.deriveKeyFromCredentials(
         formData.phoneNumber,
         formData.pin
@@ -52,12 +52,11 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess, onBackToAuth }) => {
 
       console.log('Sign up successful! FarmerId:', farmerId);
 
-      // Store in sessionStorage
       sessionStorage.setItem('farmerId', farmerId);
       sessionStorage.setItem('phoneNumber', formData.phoneNumber);
       sessionStorage.setItem('fullName', formData.fullName);
       
-      // Call success callback
+
       onSignUpSuccess(farmerId, formData.phoneNumber, formData.fullName);
 
     } catch (error) {
@@ -69,7 +68,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess, onBackToAuth }) => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-(--primary-50) flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         <button
           onClick={onBackToAuth}
@@ -81,10 +80,9 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess, onBackToAuth }) => {
 
         <div className="text-center mb-8">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">A</span>
+            <div className="rounded-lg flex items-center justify-center">
+              <span className="w-40 object-cover"><img src= "/images/logo.png" alt=''/></span>
             </div>
-            <h1 className="text-3xl font-bold text-green-900">AgriDatum</h1>
           </div>
           <p className="text-gray-600">
             Create your blockchain account
@@ -93,7 +91,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess, onBackToAuth }) => {
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="flex items-center space-x-2 mb-6">
-            <UserPlus className="w-6 h-6 text-green-600" />
+            <UserPlus className="w-6 h-6 text-(--primary-700)" />
             <h2 className="text-2xl font-bold text-gray-900">Sign Up</h2>
           </div>
 
@@ -188,7 +186,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess, onBackToAuth }) => {
             <button
               onClick={handleSignUp}
               disabled={isLoading}
-              className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
+              className="w-full bg-(--primary-700) text-white py-3 rounded-lg font-medium hover:bg-(--primary-600) disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
             >
               {isLoading ? (
                 <>
@@ -207,7 +205,7 @@ const SignUp: React.FC<SignUpProps> = ({ onSignUpSuccess, onBackToAuth }) => {
           <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-800">
               <strong>Secure & Private:</strong> Your phone number and PIN generate a unique 
-              blockchain wallet. Keep your PIN safe - we cannot recover it.
+              cardano wallet. Keep your PIN safe - we cannot recover it.
             </p>
           </div>
         </div>

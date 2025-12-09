@@ -7,14 +7,28 @@ import HarvestRecords from './HarvestRecords';
 
 interface HarvestFormProps {
   onBack: () => void;
+  onLogout?: () => void;
   harvestRecords: HarvestRecord[];
   setHarvestRecords: (records: HarvestRecord[] | ((prev: HarvestRecord[]) => HarvestRecord[])) => void;
+  isAuthenticated?: boolean;
+  currentFarmerId?: string | null;
+  currentPhoneNumber?: string | null;
+  currentFullName?: string | null;
 }
 
-const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHarvestRecords }) => {
+const HarvestForm: React.FC<HarvestFormProps> = ({ 
+  onBack, 
+  onLogout,
+  harvestRecords, 
+  setHarvestRecords,
+  isAuthenticated,
+  currentFarmerId: propFarmerId,
+  currentPhoneNumber: propPhoneNumber,
+  currentFullName: propFullName
+}) => {
   
   const [formData, setFormData] = useState<HarvestFormData>({
-    phoneNumber: '',
+    phoneNumber: propPhoneNumber || '',
     pin: '',
     plotLocation: '',
     cropType: 'Maize',
@@ -36,6 +50,12 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
       loadFarmerRecords(currentFarmerId);
     }
   }, [activeTab, currentFarmerId]);
+
+  useEffect(() => {
+    if (propPhoneNumber && !formData.phoneNumber) {
+      setFormData(prev => ({ ...prev, phoneNumber: propPhoneNumber }));
+    }
+  }, [propPhoneNumber]);
 
   const loadFarmerRecords = async (farmerId: string) => {
     setIsLoadingRecords(true);
@@ -100,7 +120,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
         formData.pin
       );
 
-      setCurrentFarmerId(farmerId); // Store for loading records later
+      setCurrentFarmerId(farmerId);
 
       
       const timestamp = new Date().toISOString();
@@ -129,6 +149,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
       console.log('signature length:', keyData.signature.length);
       console.log('farmerAddress:', keyData.farmerAddress);
 
+      
       const apiPayload = {
         farmerId,
         phoneNumber: formData.phoneNumber,
@@ -153,6 +174,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
         throw new Error(apiResponse.error || 'Failed to save harvest record');
       }
 
+      
       const newRecord: HarvestRecord = {
         id: apiResponse.data?.id?.toString() || Date.now().toString(),
         phoneNumber: formData.phoneNumber,
@@ -176,7 +198,6 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
       
       setSubmitStatus('success');
       
-      // Reset form
       setFormData({
         phoneNumber: '',
         pin: '',
@@ -213,11 +234,28 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
             Back to Home
           </button>
           
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+          <div className="flex items-center space-x-4">
+            {isAuthenticated && onLogout && (
+              <div className="flex items-center space-x-3">
+                {propFullName && (
+                  <span className="text-sm text-gray-600">
+                    Welcome, <span className="font-medium text-green-700">{propFullName}</span>
+                  </span>
+                )}
+                <button
+                  onClick={onLogout}
+                  className="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 border border-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">A</span>
+              </div>
+              <span className="text-xl font-bold text-primary-900">AgriDatum</span>
             </div>
-            <span className="text-xl font-bold text-primary-900">AgriDatum</span>
           </div>
         </div>
 
@@ -270,7 +308,11 @@ const HarvestForm: React.FC<HarvestFormProps> = ({ onBack, harvestRecords, setHa
                   className="input-field"
                   placeholder="+1234567890"
                   pattern="[+0-9\s\-]+"
+                  disabled={isAuthenticated && !!propPhoneNumber}
                 />
+                {isAuthenticated && propPhoneNumber && (
+                  <p className="text-xs text-green-600 mt-1">✓ Logged in as {propPhoneNumber}</p>
+                )}
               </div>
 
               <div>

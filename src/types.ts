@@ -20,3 +20,9 @@ export interface HarvestRecord {
   indexedOnChain?: boolean;
   farmerId?: string;
 }
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  farmerId: string | null;
+  phoneNumber: string | null;
+}
