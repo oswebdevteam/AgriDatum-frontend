@@ -24,7 +24,7 @@ function App() {
     const savedFullName = sessionStorage.getItem('fullName');
     
     if (savedFarmerId && savedPhoneNumber) {
-      console.log('🔄 Restoring session for farmer:', savedFarmerId);
+      console.log('Restoring session for farmer:', savedFarmerId);
       setCurrentFarmerId(savedFarmerId);
       setCurrentPhoneNumber(savedPhoneNumber);
       setCurrentFullName(savedFullName);

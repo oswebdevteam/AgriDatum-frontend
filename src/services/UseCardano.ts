@@ -55,7 +55,7 @@ export class cardanoRealService {
         timestamp,
       };
       
-      console.log('=== GENERATING KEYS & SIGNATURE FROM BACKEND ===');
+      console.log('GENERATING KEYS & SIGNATURE');
       console.log('URL:', url);
       console.log('harvestData:', JSON.stringify(harvestData, null, 2));
       
@@ -89,7 +89,7 @@ export class cardanoRealService {
         signature: result.signature,
       };
     } catch (error) {
-      console.error('=== KEY GENERATION ERROR ===', error);
+      console.error('KEY GENERATION ERROR', error);
       throw new Error(`Key generation failed: ${error}`);
     }
   }

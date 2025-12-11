@@ -125,7 +125,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({
       
       const timestamp = new Date().toISOString();
       
-      console.log('=== PREPARING TO GENERATE KEYS ===');
+      console.log('PREPARING TO GENERATE KEYS');
       console.log('farmerId:', farmerId);
       console.log('phoneNumber:', formData.phoneNumber);
       console.log('plotLocation:', formData.plotLocation);
@@ -143,7 +143,7 @@ const HarvestForm: React.FC<HarvestFormProps> = ({
         timestamp
       );
       
-      console.log('=== GENERATED KEY DATA ===');
+      console.log('GENERATED KEY DATA');
       console.log('publicKey:', keyData.publicKey);
       console.log('publicKey length:', keyData.publicKey.length);
       console.log('signature length:', keyData.signature.length);
@@ -161,13 +161,13 @@ const HarvestForm: React.FC<HarvestFormProps> = ({
         signature: keyData.signature
       };
 
-      console.log('=== SUBMITTING TO BACKEND ===');
+      console.log('SUBMITTING TO BACKEND');
       console.log('Payload:', JSON.stringify(apiPayload, null, 2));
       console.log('Endpoint:', `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/harvest/submit`);
       
       const apiResponse = await harvestApi.submitHarvest(apiPayload);
       
-      console.log('=== BACKEND RESPONSE ===');
+      console.log('BACKEND RESPONSE');
       console.log('Response:', JSON.stringify(apiResponse, null, 2));
 
       if (!apiResponse.success) {
