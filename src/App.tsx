@@ -6,6 +6,7 @@ import SignUp from './components/SignUp';
 import HarvestForm from './components/HaverstForm';
 import { harvestApi } from './services/api/harvestApi';
 import type { HarvestRecord } from './types';
+import ChatBot from './components/ChatBot';
 
 type AppView = 'landing' | 'auth-choice' | 'login' | 'signup' | 'harvest-form';
 
@@ -179,6 +180,7 @@ function App() {
           currentFullName={currentFullName}
         />
       )}
+      <ChatBot/>
     </div>
   );
 }

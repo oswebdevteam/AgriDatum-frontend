@@ -26,3 +26,22 @@ export interface AuthState {
   farmerId: string | null;
   phoneNumber: string | null;
 }
+
+export interface Source {
+  title: string;
+  uri: string;
+}
+
+export interface Message {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+  isStreaming?: boolean;
+  sources?: Source[];
+}
+
+export interface ChatState {
+  messages: Message[];
+  isLoading: boolean;
+  isOpen: boolean;
+}
