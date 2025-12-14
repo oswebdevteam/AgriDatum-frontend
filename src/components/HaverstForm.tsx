@@ -22,7 +22,6 @@ const HarvestForm: React.FC<HarvestFormProps> = ({
   harvestRecords, 
   setHarvestRecords,
   isAuthenticated,
-  currentFarmerId: propFarmerId,
   currentPhoneNumber: propPhoneNumber,
   currentFullName: propFullName
 }) => {
