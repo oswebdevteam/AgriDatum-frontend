@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { Message } from '../types';
 import { Icons, INITIAL_MESSAGE_TEXT } from '../constants';
 import { sendMessageStream } from '../services/gemini';
+import ReactMarkdown from "react-markdown"
+
 
 const ChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -113,7 +115,40 @@ const ChatBot: React.FC = () => {
                     }
                   `}
                 >
-                  <div className="whitespace-pre-wrap">{msg.text}</div>
+                     
+<div className="whitespace-pre-wrap prose prose-sm max-w-none">
+  <ReactMarkdown 
+    components={{
+      p: ({node, ...props}) => <p className="mb-2 last:mb-0" {...props} />,
+      strong: ({node, ...props}) => <strong className="font-bold" {...props} />,
+      h1: ({node, ...props}) => <h1 className="text-lg font-bold mb-2" {...props} />,
+      h2: ({node, ...props}) => <h2 className="text-base font-bold mb-1" {...props} />,
+      h3: ({node, ...props}) => <h3 className="text-sm font-bold mb-1" {...props} />,
+      ul: ({node, ...props}) => <ul className="list-disc ml-4 mb-2" {...props} />,
+      ol: ({node, ...props}) => <ol className="list-decimal ml-4 mb-2" {...props} />,
+      li: ({node, ...props}) => <li className="mb-1" {...props} />,
+      
+      code: ({node, className, children, ...props}) => {
+        const match = /language-(\w+)/.exec(className || '');
+        const isInline = !match;
+
+        return isInline 
+          ? (
+            <code className="bg-gray-100 px-1 rounded text-xs" {...props}>
+              {children}
+            </code>
+          ) 
+          : (
+            <code className={`block bg-gray-100 p-2 rounded text-xs overflow-x-auto ${className || ''}`} {...props}>
+              {children}
+            </code>
+          );
+      },
+    }}
+  >
+    {msg.text}
+  </ReactMarkdown>
+</div>
                   
                   {msg.sources && msg.sources.length > 0 && (
                     <div className="mt-3 pt-3 border-t border-gray-100/20">
