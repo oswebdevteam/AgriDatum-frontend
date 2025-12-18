@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserPlus, Phone, Lock, User, ArrowLeft } from 'lucide-react';
-import { cardanoRealService } from '../services/UseCardano';
+import { cardanoRealService } from '../services/Cardano';
 
 interface SignUpProps {
   onSignUpSuccess: (farmerId: string, phoneNumber: string, fullName: string) => void;
