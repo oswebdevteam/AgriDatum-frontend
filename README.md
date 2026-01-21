@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# AgriDatum (Frontend Repository) 🌾
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AgriDatum is a blockchain-powered agricultural platform designed to revolutionize harvest data management. By leveraging the Cardano blockchain and AI-driven insights, AgriDatum ensures data integrity, transparency, and smarter decision-making for farmers.
 
-Currently, two official plugins are available:
+## 🚀 Key Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Secure Harvest Logging**: Record crop types, weights, and locations with ease.
+- **Blockchain Verification**: Every record is signed and hashed on the Cardano blockchain for immutable proof of origin.
+- **AI Agricultural Assistant**: Integrated ChatBot powered by Google Gemini to help farmers with agricultural queries.
+- **Farmer Authentication**: Secure login and sign-up with Cardano-derived cryptographic identities.
+- **Real-time Dashboard**: View and manage harvest history with on-chain status verification.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: [React](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vitejs.dev/)
+- **Styling**: [TailwindCSS](https://tailwindcss.com/)
+- **Blockchain Integration**: [MeshSDK](https://meshjs.dev/) for Cardano
+- **AI Engine**: [Google Gemini Pro](https://deepmind.google/technologies/gemini/)
+- **Icons**: [Lucide React](https://lucide.dev/)
 
-## Expanding the ESLint configuration
+## 📦 Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- [Node.js](https://nodejs.org/) (v18+) or [Bun](https://bun.sh/)
+- A `.env` file with the following variables:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+  ```env
+  VITE_API_URL=your_backend_url
+  VITE_GEMINI_API_KEY=your_gemini_key
+  ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Installation
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+1. Clone the repository:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+   ```bash
+   git clone https://github.com/your-repo/agridatum.git
+   cd agridatum
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. Install dependencies:
+
+   ```bash
+   bun install
+   # or
+   npm install
+   ```
+
+3. Run the development server:
+
+   ```bash
+   bun dev
+   # or
+   npm run dev
+   ```
+
+## 📂 Project Structure
+
+- `src/components`: UI components (Landing Page, Forms, ChatBot, etc.)
+- `src/services`: API services and Blockchain logic (Cardano, Gemini)
+- `src/types`: TypeScript definitions
+- `src/utils`: Helper functions and utilities
+
+## 🛡 Security & Verification
+
+AgriDatum uses a unique key derivation system. When a farmer signs in with their phone number and PIN, a secure cryptographic identity is derived to sign harvest records. These signatures are verifiable on-chain, preventing data tampering.
+
+---
+
+Built with ❤️ for the future of Agriculture.
