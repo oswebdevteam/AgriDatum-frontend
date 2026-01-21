@@ -1,8 +1,8 @@
-# AgriDatum (Frontend Repository) 🌾
+# AgriDatum (Frontend Repository)
 
 AgriDatum is a blockchain-powered agricultural platform designed to revolutionize harvest data management. By leveraging the Cardano blockchain and AI-driven insights, AgriDatum ensures data integrity, transparency, and smarter decision-making for farmers.
 
-## 🚀 Key Features
+## Key Features
 
 - **Secure Harvest Logging**: Record crop types, weights, and locations with ease.
 - **Blockchain Verification**: Every record is signed and hashed on the Cardano blockchain for immutable proof of origin.
@@ -10,7 +10,7 @@ AgriDatum is a blockchain-powered agricultural platform designed to revolutioniz
 - **Farmer Authentication**: Secure login and sign-up with Cardano-derived cryptographic identities.
 - **Real-time Dashboard**: View and manage harvest history with on-chain status verification.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Frontend**: [React](https://reactjs.org/) + [TypeScript](https://www.typescriptlang.org/)
 - **Build Tool**: [Vite](https://vitejs.dev/)
@@ -19,7 +19,7 @@ AgriDatum is a blockchain-powered agricultural platform designed to revolutioniz
 - **AI Engine**: [Google Gemini Pro](https://deepmind.google/technologies/gemini/)
 - **Icons**: [Lucide React](https://lucide.dev/)
 
-## 📦 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -56,17 +56,17 @@ AgriDatum is a blockchain-powered agricultural platform designed to revolutioniz
    npm run dev
    ```
 
-## 📂 Project Structure
+## Project Structure
 
 - `src/components`: UI components (Landing Page, Forms, ChatBot, etc.)
 - `src/services`: API services and Blockchain logic (Cardano, Gemini)
 - `src/types`: TypeScript definitions
 - `src/utils`: Helper functions and utilities
 
-## 🛡 Security & Verification
+## Security & Verification
 
 AgriDatum uses a unique key derivation system. When a farmer signs in with their phone number and PIN, a secure cryptographic identity is derived to sign harvest records. These signatures are verifiable on-chain, preventing data tampering.
 
 ---
 
-Built with ❤️ for the future of Agriculture.
+Built for the future of Agriculture.
